@@ -1,9 +1,3 @@
 {
-  "persons": [
-    {
-      "name": "Derek Bruinooge",
-      "number": "432432432",
-      "id": 1
-    }
-  ]
+  "persons": []
 }

@@ -4,6 +4,50 @@ import personService from './services/persons.js';
 
 const BACKEND = 'http://localhost:3001';
 
+const successMessageStyles = {
+  color: 'green',
+  background: 'lightgrey',
+  fontSize: 20,
+  borderStyle: 'solid',
+  borderRadius: 5,
+  padding: 10,
+  marginTop: 10,
+}
+
+const errorMessageStyles = {
+  color: 'red',
+  background: 'lightgrey',
+  fontSize: 20,
+  borderStyle: 'solid',
+  borderRadius: 5,
+  padding: 10,
+  marginTop: 10,
+}
+
+const SuccessNotification = ({ successMessage }) => {
+  if (successMessage === null) {
+    return null
+  }
+
+  return (
+    <div style={successMessageStyles}>
+      {successMessage}
+    </div>
+  )
+}
+
+const ErrorNotification = ({ errorMessage }) => {
+  if (errorMessage === null) {
+    return null
+  }
+
+  return (
+    <div style={errorMessageStyles}>
+      {errorMessage}
+    </div>
+  )
+}
+
 const Filter = ({handleFilterChange, filter}) => (
   <>
     <div>
@@ -53,8 +97,8 @@ const App = () => {
   const [filter, setFilter] = useState('');
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
-
-
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     console.log('effect');
@@ -67,6 +111,14 @@ const App = () => {
     return person.name.toLowerCase().includes(filter);
   });
 
+  const setMessageAndTimer = (message, callback) => {
+      callback(message);
+      setTimeout(() => {
+        callback(null);
+      }, 5000);
+  }
+
+
   const addName = (event) => {
     event.preventDefault();
 
@@ -77,6 +129,16 @@ const App = () => {
         personService
           .changeNumber(id, { number: newNumber })
           .then(() => {
+            personService
+              .getPersons()
+              .then(data => {
+                setPersons(data);
+                setMessageAndTimer(`Updated ${newName}'s phone number: ${newNumber}`, setSuccessMessage);
+              });
+          })
+          .catch(() => {
+            console.log('error');
+            setMessageAndTimer(`Person has already been removed from server`, setErrorMessage);
             personService
               .getPersons()
               .then(data => setPersons(data));
@@ -91,7 +153,10 @@ const App = () => {
 
       personService
         .addPerson(newPerson)
-        .then(data => setPersons(persons.concat(data)))      
+        .then(data => {
+          setPersons(persons.concat(data))
+          setMessageAndTimer(`Added ${newName}`, setSuccessMessage);
+        })      
 
       setNewName('');
       setNewNumber('');
@@ -106,6 +171,7 @@ const App = () => {
         .getPersons()
         .then(data => setPersons(data));
       })
+
   }
 
   const handleNameChange = (event) => {
@@ -132,6 +198,8 @@ const App = () => {
                   newNumber={newNumber} />
       <h3>Numbers</h3>
       <ListPersons persons={personsToShow} removePerson={removePerson}/>
+      <SuccessNotification successMessage={successMessage} />
+      <ErrorNotification errorMessage={errorMessage} />
     </div>
   )
 }
