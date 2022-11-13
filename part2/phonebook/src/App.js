@@ -1,8 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import personService from './services/persons.js';
-
-const BACKEND = 'http://localhost:3001';
 
 const successMessageStyles = {
   color: 'green',
@@ -125,9 +122,8 @@ const App = () => {
     if (persons.some(person => person.name === newName)) {
       if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
         const id = persons.find(person => person.name === newName).id;
-        console.log(id);
         personService
-          .changeNumber(id, { number: newNumber })
+          .changePerson(id, { name: newName, number: newNumber })
           .then(() => {
             personService
               .getPersons()
@@ -136,9 +132,9 @@ const App = () => {
                 setMessageAndTimer(`Updated ${newName}'s phone number: ${newNumber}`, setSuccessMessage);
               });
           })
-          .catch(() => {
-            console.log('error');
-            setMessageAndTimer(`Person has already been removed from server`, setErrorMessage);
+          .catch((error) => {
+            setMessageAndTimer(error.response.data.error, setErrorMessage);
+            console.log(error.response.data.error);
             personService
               .getPersons()
               .then(data => setPersons(data));
@@ -156,7 +152,11 @@ const App = () => {
         .then(data => {
           setPersons(persons.concat(data))
           setMessageAndTimer(`Added ${newName}`, setSuccessMessage);
-        })      
+        })   
+        .catch(error => {
+          setMessageAndTimer(error.response.data.error, setErrorMessage);
+          console.log(error.response.data.error);
+        })   
 
       setNewName('');
       setNewNumber('');
