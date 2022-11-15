@@ -6,13 +6,58 @@ const bcrypt = require('bcrypt');
 const Blog = require('../models/blog');
 const User = require('../models/user');
 const { initialBlogs, blogsInDb, usersInDb } = require('./test_helper'); 
+let token;
 
+async function createUser() {
+  const user = {
+    username: 'jth',
+    password: 'letmein'
+  }
+  await api.post('/api/users').send(user);
+  const response = await api.post('/api/login').send(user);
+  token = response.body.token;
+}
 
+beforeAll(async () => {
+  await createUser();
+})
 
 beforeEach(async () => {
   await Blog.deleteMany({});
   const blogArray = initialBlogs.map(blog => new Blog(blog).save());
   await Promise.all(blogArray);
+})
+
+test('blog can be added to the list', async () => {
+  await api
+    .post('/api/blogs')
+    .set({ Authorization: 'Bearer ' + token })
+    .send({
+      title: "Monkeys are awesome",
+      author: "Monkey Expert",
+      url: "www.monkeyfun.com",
+      likes: 16,
+    })
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const updatedBlogs = await blogsInDb();
+  const updatedTitles = updatedBlogs.map(blog => blog.title);
+
+  expect(updatedBlogs).toHaveLength(initialBlogs.length + 1);
+  expect(updatedTitles).toContain('Monkeys are awesome');
+});
+
+test('adding blog fails if token not provided', async () => {
+  await api
+    .post('/api/blogs')
+    .send({
+      title: 'great blog',
+      author: 'some guy',
+      url: 'somewhere out there',
+      likes: 5
+    })
+    .expect(400);
 })
 
 describe('when creating a new user', () => {
@@ -98,28 +143,11 @@ test('unique identifier property of blogs is named id', async () => {
   expect(blog.id).toBeDefined();
 })
 
-test('blog can be added to the list', async () => {
-  await api
-    .post('/api/blogs')
-    .send({
-      title: "Monkeys are awesome",
-      author: "Monkey Expert",
-      url: "www.monkeyfun.com",
-      likes: 16
-    })
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
-
-  const updatedBlogs = await blogsInDb();
-  const updatedTitles = updatedBlogs.map(blog => blog.title);
-
-  expect(updatedBlogs).toHaveLength(initialBlogs.length + 1);
-  expect(updatedTitles).toContain('Monkeys are awesome');
-});
-
 test('likes for new blog defaults to 0', async () => {
+  await createUser();
   await api
   .post('/api/blogs')
+  .set('Authorization', 'Bearer ' + token)
   .send({
     title: "Monkeys are bad",
     author: "Monkey Hater",
@@ -140,6 +168,8 @@ test('new blog with no title or no url returns 400 Bad Request', async () => {
   .expect(400);
 })
 
-afterAll(() => {
+afterAll(async () => {
+  await User.deleteMany({});
+  await Blog.deleteMany({});
   mongoose.connection.close();
 })
