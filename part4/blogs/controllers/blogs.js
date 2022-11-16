@@ -22,8 +22,6 @@ blogsRouter.post('/', userExtractor, async (request, response, next) => {
     if (!blog.title || !blog.url) {
       return response.send(400);
     }
-    
-    
 
     blog.likes = blog.likes || 0;
     blog.user = user._id;
@@ -53,6 +51,20 @@ blogsRouter.delete('/:id', userExtractor, async (request, response, next) => {
     } else {
       return response.status(400).send({ error: 'user not authorized to delete that blog' });
     }
+  } catch (error) {
+    next(error);
+  }
+});
+
+blogsRouter.put('/:id', async (request, response, next) => {
+  try {
+    const blog = await Blog.findById(request.params.id);
+    const updatedBlog = await Blog.findByIdAndUpdate(
+      request.params.id,
+      { likes: blog.likes + 1 },
+      { new: true }
+      );
+    response.json(updatedBlog);
   } catch (error) {
     next(error);
   }
