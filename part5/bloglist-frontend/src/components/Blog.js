@@ -20,7 +20,7 @@ const Blog = ({blog, handleDelete}) => {
   }
 
   return (
-    <div style={blogStyle}>
+    <div style={blogStyle} class='blog'>
       {blog.title + ' '} 
       <button onClick={() => setDetailsVisible(!detailsVisible)}>
         {detailsVisible ? 'hide' : 'view '}
