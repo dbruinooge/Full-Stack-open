@@ -28,4 +28,10 @@ const remove = async (blog) => {
   return response.data;
 };
 
-export default { setToken, getAll, createNew, like, remove };
+const comment = async (blog, comment) => {
+  const headers = { Authorization: token };
+  const response = await axios.post(baseUrl + '/' + blog.id + '/comments', {comment}, { headers });
+  return response.data;
+}
+
+export default { setToken, getAll, createNew, like, remove, comment };

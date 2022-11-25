@@ -9,6 +9,21 @@ blogsRouter.get("/", async (request, response) => {
   response.json(blogs);
 });
 
+blogsRouter.post('/:id/comments', userExtractor, async (request, response, next) => {
+  try {
+    const blog = await Blog.findById(request.params.id);
+    const comment = request.body.comment;
+    const updatedBlog = await Blog.findByIdAndUpdate(
+      request.params.id,
+      { comments: blog.comments.concat(comment) },
+      { new: true }
+    );
+    response.json(updatedBlog);
+  } catch (error) {
+    next(error);
+  }
+});
+
 blogsRouter.post("/", userExtractor, async (request, response, next) => {
   const blog = request.body;
   const user = request.user;

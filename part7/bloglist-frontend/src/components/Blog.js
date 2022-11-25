@@ -1,9 +1,12 @@
 import { useState } from "react";
-import blogService from "../services/blogs";
 import { likeBlog, removeBlog } from '../reducers/blogReducer';
 import { setNotification } from '../reducers/notificationReducer';
 import PropTypes from "prop-types";
 import { useDispatch } from 'react-redux';
+import {
+  BrowserRouter as Router,
+  Routes, Route, Link
+} from 'react-router-dom';
 
 const Blog = ({ blog }) => {
   const dispatch = useDispatch();
@@ -39,20 +42,7 @@ const Blog = ({ blog }) => {
 
   return (
     <div style={blogStyle}>
-      {blog.title + " "}
-      <button onClick={() => setDetailsVisible(!detailsVisible)}>
-        {detailsVisible ? "hide" : "view "}
-      </button>
-      {detailsVisible && (
-        <>
-          <p>{blog.url}</p>
-          <p>
-            likes {blog.likes} <button onClick={() => handleLike(blog)}>like</button>
-          </p>
-          <p>{blog.author}</p>
-          <button onClick={() => handleDelete(blog)}>remove</button>
-        </>
-      )}
+      <Link to={`/blogs/${blog.id}`}>{blog.title} </Link>
     </div>
   );
 };

@@ -1,23 +1,22 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import blogService from "./services/blogs";
-import loginService from "./services/login";
-import Togglable from "./components/togglable";
-import NewBlogForm from "./components/newBlogForm";
 import Notification from './components/Notification';
 import BlogList from './components/BlogList';
-import { setNotification } from './reducers/notificationReducer';
-import { initializeBlogs, createBlog } from './reducers/blogReducer';
-import { login, logout, restoreUser, setToken } from './reducers/userReducer';
+import Users from './components/Users';
+import User from './components/User';
+import BlogView from './components/BlogView';
+import { initializeBlogs } from './reducers/blogReducer';
+import { login, logout, restoreUser } from './reducers/userReducer';
+import { Container, TextField, Button } from '@mui/material';
+import {
+  BrowserRouter as Router,
+  Routes, Route, Link
+} from 'react-router-dom';
 
 const App = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [url, setUrl] = useState("");
-
-  console.log(useSelector(state => state));
 
   const user = useSelector(state => state.user);
 
@@ -53,26 +52,11 @@ const App = () => {
     dispatch(logout());
   };
 
-  const handleNewBlog = async (event) => {
-    event.preventDefault();
-    const newBlog = { title, author, url };
-    try {
-      dispatch(createBlog(newBlog));      
-      dispatch(setNotification(`Blog created: ${newBlog.title} ${newBlog.author}`, 3));
-      setTitle("");
-      setAuthor("");
-      setUrl("");
-      dispatch(initializeBlogs());
-    } catch (exception) {
-      dispatch(setNotification(exception.message, 10));
-    }
-  };
-
   const loginForm = () => (
     <form onSubmit={handleLogin}>
       <div>
-        username
-        <input
+        <TextField
+          label="username"
           id="username"
           type="text"
           value={username}
@@ -81,8 +65,8 @@ const App = () => {
         />
       </div>
       <div>
-        password
-        <input
+        <TextField
+          label="password"
           id="password"
           type="password"
           value={password}
@@ -90,36 +74,45 @@ const App = () => {
           onChange={({ target }) => setPassword(target.value)}
         />
       </div>
-      <button type="submit" id="login-button">
+      <Button variant="contained" color="primary" type="submit" id="login-button">
         login
-      </button>
+      </Button>
     </form>
   );
 
+  const padding = { padding: 5 };
+
   return (
-    <div>
-      <Notification />
-      {user.username === undefined ? (
-        loginForm()
-      ) : (
+    <Container>
+      <Router>
         <div>
-          <p>Logged in as {user.username}</p>
-          <button onClick={handleLogout}>logout</button>
-          <Togglable buttonLabel="create new blog">
-            <NewBlogForm
-              handleNewBlog={handleNewBlog}
-              title={title}
-              setTitle={setTitle}
-              author={author}
-              setAuthor={setAuthor}
-              url={url}
-              setUrl={setUrl}
-            />
-          </Togglable>
-          <BlogList/>
+          <Link style={padding} to="/">home </Link>
+          <Link stype={padding} to="/users">users </Link>
+          {user.username === undefined ? (
+            null
+          ) : (
+            <>
+              <span>Logged in as {user.username} </span>
+              <button onClick={handleLogout}>logout</button>
+            </>
+          )}
         </div>
-      )}
-    </div>
+        <div>
+          <Notification />
+          {user.username === undefined ? (
+            loginForm()
+          ) : (
+            null
+          )}
+        </div>
+        <Routes>
+          <Route path="/blogs/:id" element={<BlogView />} />
+          <Route path="/users/:id" element={<User />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/" element={<BlogList />} />        
+        </Routes>
+      </Router>
+    </Container>
   );
 };
 
