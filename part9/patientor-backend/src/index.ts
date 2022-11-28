@@ -6,6 +6,8 @@ import patientRouter from './routes/patients';
 const app = express();
 
 app.use(cors());
+app.use(express.json());
+
 app.use('/api/diagnoses', diagnosisRouter);
 app.use('/api/patients', patientRouter);
 
