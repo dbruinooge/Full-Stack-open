@@ -89,6 +89,7 @@ const PatientView = () => {
             );            
           })}
         </ul>
+        
       </div>
     );
   } else {
