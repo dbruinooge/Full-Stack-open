@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "axios";
 import { Box, Table, Button, TableHead, Typography } from "@material-ui/core";
+import { Link } from 'react-router-dom';
 
 import { PatientFormValues } from "../AddPatientModal/AddPatientForm";
 import AddPatientModal from "../AddPatientModal";
@@ -11,6 +12,7 @@ import { useStateValue } from "../state";
 import { TableCell } from "@material-ui/core";
 import { TableRow } from "@material-ui/core";
 import { TableBody } from "@material-ui/core";
+import { addPatient } from "../state";
 
 const PatientListPage = () => {
   const [{ patients }, dispatch] = useStateValue();
@@ -31,7 +33,7 @@ const PatientListPage = () => {
         `${apiBaseUrl}/patients`,
         values
       );
-      dispatch({ type: "ADD_PATIENT", payload: newPatient });
+      dispatch(addPatient(newPatient));
       closeModal();
     } catch (e: unknown) {
       if (axios.isAxiosError(e)) {
@@ -63,7 +65,7 @@ const PatientListPage = () => {
         <TableBody>
           {Object.values(patients).map((patient: Patient) => (
             <TableRow key={patient.id}>
-              <TableCell>{patient.name}</TableCell>
+              <TableCell><Link to={'/patients/' + patient.id}>{patient.name}</Link></TableCell>
               <TableCell>{patient.gender}</TableCell>
               <TableCell>{patient.occupation}</TableCell>
               <TableCell>
