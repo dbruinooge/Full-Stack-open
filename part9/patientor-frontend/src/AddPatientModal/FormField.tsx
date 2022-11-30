@@ -24,6 +24,31 @@ type SelectFieldProps = {
   options: GenderOption[];
 };
 
+type TypeSelectFieldProps = {
+  name: string;
+  label: string;
+  options: { value: string, label: string }[];
+};
+
+export const TypeSelectField = ({ name, label, options }: TypeSelectFieldProps) => (
+  <>
+    <InputLabel>{label}</InputLabel>
+    <Field
+      fullWidth
+      style={{ marginBottom: "0.5em" }}
+      label={label}
+      component={FormikSelect}
+      name={name}
+    >
+      {options.map((option) => (
+        <MenuItem key={option.value} value={option.value}>
+          {option.label || option.value}
+        </MenuItem>
+      ))}
+    </Field>
+  </>
+);
+
 const FormikSelect = ({ field, ...props }: FieldProps) => <Select {...field} {...props} />;
 
 export const SelectField = ({ name, label, options }: SelectFieldProps) => (
@@ -111,10 +136,10 @@ export const DiagnosisSelection = ({
 }) => {
   const [selectedDiagnoses, setDiagnoses] = useState<string[]>([]);
   const field = "diagnosisCodes";
-  const onChange = (data: string[]) => {    
+  const onChange = (data: string[]) => { 
     setDiagnoses([...data]);
     setFieldTouched(field, true);
-    setFieldValue(field, selectedDiagnoses);
+    setFieldValue(field, selectedDiagnoses);   
   };
 
   const stateOptions = diagnoses.map((diagnosis) => ({
