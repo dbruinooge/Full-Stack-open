@@ -8,8 +8,8 @@ router.post('/:id/entries', (req, res) => {
   try {
     const patientId = req.params.id;
     const newEntry = toNewEntry(req.body);
-    const addedEntry = addEntry(newEntry, patientId);
-    res.json(addedEntry);
+    const patientWithAddedEntry = addEntry(newEntry, patientId);
+    res.json(patientWithAddedEntry);
   } catch (error: unknown) {
     let errorMessage = 'Something went wrong.';
     if (error instanceof Error) {
@@ -30,7 +30,6 @@ router.get('/:id', (req, res) => {
 
 router.get('/', (_req, res) => {
   const patients = getNonSensitivePatients();
-  console.log(patients);
   res.json(patients);
 });
 

@@ -31,12 +31,12 @@ export const addPatient = ( patient: NewPatient ): Patient => {
     return newPatient;
 };
 
-export const addEntry = ( newEntry: Entry, patientId: string ): Entry => {
+export const addEntry = ( newEntry: Entry, patientId: string ): Patient => {
   const patient = patients.find(patient => patient.id === patientId);
   if (!patient) {
     throw new Error ('No patient found with that id');
   }
 
   patient.entries.push(newEntry);
-  return newEntry;
+  return patient;
 };

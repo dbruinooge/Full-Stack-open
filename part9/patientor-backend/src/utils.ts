@@ -46,30 +46,16 @@ const parseGender = (gender: unknown): Gender => {
 type EntryType = 'Hospital' | 'HealthCheck' | 'OccupationalHealthcare';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-// const isEntryType = (param: any): param is EntryType => {
-//   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-//   return ['Hospital', 'HealthCheck', 'OccupationalHealthcare'].includes(param);
-// };
-
-// const parseEntryType = (type: unknown): EntryType => {
-//   if (!type || !isEntryType(type)) {
-//     throw new Error ('Incorrect or missing type: ' + type);
-//   }
-
-//   return type;
-// };
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isDiagnosisCode = (code: any): code is Diagnosis => {
+const isDiagnosisCode = (code: any): code is Diagnosis['code'] => {
   return diagnoses.some(diagnosis => diagnosis.code === code);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isDiagnosisCodes = (codes: any): codes is Diagnosis[] => {
+const isDiagnosisCodes = (codes: any): codes is Diagnosis['code'][] => {
   return (Array.isArray(codes) && codes.every(code => isDiagnosisCode(code)));
 };
 
-const parseDiagnosisCodes = (codes: unknown): Diagnosis[] => {
+const parseDiagnosisCodes = (codes: unknown): Diagnosis['code'][] => {
   if (!isDiagnosisCodes(codes)) {
     throw new Error ('Incorrect diagnostic codes: ' + codes);
   }
@@ -109,47 +95,13 @@ export interface NewEntry {
   diagnosisCodes?: Array<Diagnosis['code']>;
 }
 
-// export interface NewHealthCheckEntry extends NewEntry {
-
-// }
-
-
-// export const toNewBaseEntry = (
-//   { type, description, date, specialist } : NewEntry,
-//   id: string
-// ): NewEntry => {
-//   const newEntry: NewEntry = {
-//     id,
-//     type: parseEntryType(type),
-//     description: parseString(description),
-//     date: parseDate(date),
-//     specialist: parseString(specialist),
-//   };
-
-//   return newEntry;
-// };
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-// const isHealthCareRating = (param: any): param is HealthCheckRating => {
-//   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-//   return Object.values(HealthCheckRating).includes(param);
-// };
-
-// const parseHealthCareRating = (param: unknown): HealthCheckRating => {
-//   if (!isHealthCareRating(param)) {
-//     throw new Error ('Incorrect health care rating: ' + param);
-//   }
-
-//   return param;
-// };
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const toNewEntry = (newEntry: any): Entry => {
   if (!newEntry.description || !newEntry.date || !newEntry.specialist) {
     throw new Error ('Missing description, date, or specialist');
   }
   if (newEntry.diagnosisCodes) {
-    parseDiagnosisCodes(newEntry);
+    parseDiagnosisCodes(newEntry.diagnosisCodes);
   }
   newEntry.id = uuid();
   switch (newEntry.type) {
@@ -165,7 +117,7 @@ export const toNewEntry = (newEntry: any): Entry => {
       return newEntry as HealthCheckEntry;
     case 'OccupationalHealthcare':
       if (!newEntry.employerName) {
-        throw new Error ('Employer or sick leave missing');
+        throw new Error ('Employer name missing');
       }
       return newEntry as OccupationalHealthcareEntry;
     default:
